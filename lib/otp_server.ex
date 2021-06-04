@@ -2,10 +2,12 @@ defmodule Otp.Actor do
   use GenServer
 
   @impl true
-  def init(initial_number) do
+  def init(initial_number) when is_number(initial_number) do
     # return {:ok, initial_state}
     {:ok, initial_number}
   end
+
+  def init(_initial), do: {:error, "Error"} end
 
   # :next_number: Client request
   # _from : Client PID
