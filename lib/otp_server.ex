@@ -3,6 +3,7 @@ defmodule Otp.Actor do
 
   @impl true
   def init(initial_number) do
+    # return {:ok, initial_state}
     {:ok, initial_number}
   end
 
@@ -16,11 +17,13 @@ defmodule Otp.Actor do
     # action:
     #  :reply -> reply to client
     # {action, client response, new state}
+    # return {:reply, response, updated_state}
     {:reply, response, next_state}
   end
 
   @impl true
   def handle_cast({:update_number, number}, _current_state) do
+    # return {:noreply, updated_state}
     {:noreply, number}
   end
 end
