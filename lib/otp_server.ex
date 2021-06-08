@@ -7,7 +7,7 @@ defmodule Otp.Actor do
     {:ok, initial_number}
   end
 
-  def init(_initial), do: {:error, "Error"} end
+  def init(_initial), do: {:error, "Error"}
 
   # :next_number: Client request
   # _from : Client PID
