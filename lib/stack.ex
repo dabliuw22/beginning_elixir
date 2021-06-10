@@ -4,8 +4,16 @@ defmodule Stack.Actor do
   @name __MODULE__
   def name, do: @name
 
-  def start_link(stack \\ []) when is_list(stack) do
-    GenServer.start_link(__MODULE__, stack, name: @name)
+  def start_link(stack \\ [], options \\ [name: @name])
+      when is_list(stack) and is_list(options) do
+    GenServer.start_link(__MODULE__, stack, options)
+  end
+
+  def child_spec(stack \\ []) when is_list(stack) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [[1], [name: Stack.Actor.name()]]}
+    }
   end
 
   @impl true
@@ -52,15 +60,28 @@ defmodule Stack.Client do
   def run do
     # Supervisor.start_link([Stack.Actor.name()], strategy: :one_for_all)
     children = [
+      Stack.Actor
       # {Actor Module, initial state}
-      {Stack.Actor.name(), []}
+      # {Stack.Actor.name(), []}
+      # %{
+      # id: identificar la especificación del child
+      # id: Stack.Actor,
+      # start: módulo-function-args que se invocará para iniciar el proceso hijo
+      # Stack.Actor.start_link([1], [name: Stack.Actor.name()])
+      # start: {Stack.Actor, :start_link, [[1], [name: Stack.Actor.name()]]}
+      # }
     ]
 
-    Supervisor.start_link(
-      children,
+    options = [
       strategy: :one_for_one,
       name: Stack.Supervisor
-    )
+    ]
+
+    {:ok, _pid} =
+      Supervisor.start_link(
+        children,
+        options
+      )
 
     Stack.Impl.push(2)
     Stack.Impl.push(3)
