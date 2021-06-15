@@ -1,5 +1,6 @@
 defmodule Stack.Actor do
   use GenServer, restart: :transient
+  require Logger
 
   @name __MODULE__
   def name, do: @name
@@ -12,32 +13,39 @@ defmodule Stack.Actor do
   def child_spec(stack \\ []) when is_list(stack) do
     %{
       id: __MODULE__,
-      start: {__MODULE__, :start_link, [[1], [name: Stack.Actor.name()]]}
+      start: {__MODULE__, :start_link, [stack, [name: Stack.Actor.name()]]},
+      restart: :transient
     }
   end
 
+  ## Callbacks
   @impl true
   def init(stack) do
+    Logger.info("Init...")
     {:ok, stack}
   end
 
   @impl true
   def handle_call(:pop, _from, [head | tail]) do
+    Logger.info("Pop...")
     {:reply, head, tail}
   end
 
   @impl true
   def handle_call(:pop, _from, [] = state) do
+    Logger.info("Pop...")
     {:reply, nil, state}
   end
 
   @impl true
   def handle_call(:stack, _from, stack) do
+    Logger.info("Stack...")
     {:reply, stack, stack}
   end
 
   @impl true
   def handle_cast({:push, element}, state) do
+    Logger.info("Push...")
     {:noreply, [element | state]}
   end
 end
@@ -57,12 +65,13 @@ defmodule Stack.Impl do
 end
 
 defmodule Stack.Client do
+  require Logger
+
   def run do
     # Supervisor.start_link([Stack.Actor.name()], strategy: :one_for_all)
     children = [
-      Stack.Actor
-      # {Actor Module, initial state}
-      # {Stack.Actor.name(), []}
+      # {Actor Module, initial state},
+      {Stack.Actor, [1]}
       # %{
       # id: identificar la especificación del child
       # id: Stack.Actor,
@@ -89,9 +98,9 @@ defmodule Stack.Client do
     Stack.Impl.pop()
     Stack.Impl.pop()
     state = Stack.Impl.stack()
-    IO.inspect(state)
+    Logger.info("#{inspect(state)}")
     Stack.Impl.pop()
     response = Stack.Impl.pop()
-    IO.puts(response)
+    Logger.info(response)
   end
 end
